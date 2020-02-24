@@ -13,10 +13,12 @@
 /************************************************
  * 				 GENERIC MACROS
  ************************************************/
-#define ENABLE  	1
-#define DISABLE 	0
-#define SET 		ENABLE
-#define RESET 		DISABLE
+#define ENABLE  		1
+#define DISABLE 		0
+#define SET 			ENABLE
+#define RESET 			DISABLE
+#define GPIO_PIN_SET	SET
+#define GPIO_PIN_RESET	RESET
 
 /************************************************
  * 					TYPEDEFS
@@ -70,7 +72,16 @@ typedef struct {
 	volatile uint32_t DCKCFGR;			//	Dedicated clock configuration register
 } RCC_RegDef_t;
 
-
+//	EXTI
+typedef struct
+{
+	volatile uint32_t IMR;    /*!< EXTI Interrupt mask register,            Address offset: 0x00 */
+	volatile uint32_t EMR;    /*!< EXTI Event mask register,                Address offset: 0x04 */
+	volatile uint32_t RTSR;   /*!< EXTI Rising trigger selection register,  Address offset: 0x08 */
+	volatile uint32_t FTSR;   /*!< EXTI Falling trigger selection register, Address offset: 0x0C */
+	volatile uint32_t SWIER;  /*!< EXTI Software interrupt event register,  Address offset: 0x10 */
+	volatile uint32_t PR;     /*!< EXTI Pending register,                   Address offset: 0x14 */
+} EXTI_RegDef_t;
 /*************************************************
  * 					BASE ADDRESSES
  ************************************************/
@@ -201,6 +212,9 @@ typedef struct {
 //	RCC
 #define RCC			((RCC_RegDef_t*) RCC_BASE)
 
+//	EXTI
+#define EXTI		((EXTI_RegDef_t*) EXTI_BASE)
+
 //	I2C
 //#define I2C			((I2C_))	//	I aint got time to write typedefs now
 
@@ -212,9 +226,28 @@ typedef struct {
 //	GPIO
 #define GPIOA_PCLK_EN() RCC->AHB1ENR |= (1 << 0)	//	Enable bit 0 in AHB1ENR (I/O port A enable)
 #define GPIOB_PCLK_EN() RCC->AHB1ENR |= (1 << 1)
+#define GPIOC_PCLK_EN() RCC->AHB1ENR |= (1 << 2)
+#define GPIOD_PCLK_EN() RCC->AHB1ENR |= (1 << 3)
+#define GPIOE_PCLK_EN() RCC->AHB1ENR |= (1 << 4)
+#define GPIOF_PCLK_EN() RCC->AHB1ENR |= (1 << 5)
+#define GPIOG_PCLK_EN() RCC->AHB1ENR |= (1 << 6)
+#define GPIOH_PCLK_EN() RCC->AHB1ENR |= (1 << 7)
+#define GPIOI_PCLK_EN() RCC->AHB1ENR |= (1 << 8)
+#define GPIOJ_PCLK_EN() RCC->AHB1ENR |= (1 << 9)
+#define GPIOK_PCLK_EN() RCC->AHB1ENR |= (1 << 10)
 
 #define GPIOA_PCLK_DI() RCC->AHB1ENR &= ~(1 << 0)
-#define GPIOB_PCLK_DI() RCC->AHB1ENR &= ~(1 << 0)
+#define GPIOB_PCLK_DI() RCC->AHB1ENR &= ~(1 << 1)
+#define GPIOC_PCLK_DI() RCC->AHB1ENR &= ~(1 << 2)
+#define GPIOD_PCLK_DI() RCC->AHB1ENR &= ~(1 << 3)
+#define GPIOE_PCLK_DI() RCC->AHB1ENR &= ~(1 << 4)
+#define GPIOF_PCLK_DI() RCC->AHB1ENR &= ~(1 << 5)
+#define GPIOG_PCLK_DI() RCC->AHB1ENR &= ~(1 << 6)
+#define GPIOH_PCLK_DI() RCC->AHB1ENR &= ~(1 << 7)
+#define GPIOI_PCLK_DI() RCC->AHB1ENR &= ~(1 << 8)
+#define GPIOJ_PCLK_DI() RCC->AHB1ENR &= ~(1 << 9)
+#define GPIOK_PCLK_DI() RCC->AHB1ENR &= ~(1 << 10)
+
 
 //	I2C
 #define I2C1_PCLK_EN() RCC->APB1ENR |= (1 << 21)

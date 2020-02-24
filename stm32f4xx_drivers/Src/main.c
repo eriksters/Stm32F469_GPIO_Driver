@@ -8,12 +8,36 @@
 */
 
 #include "stm32f469xx.h"
+#include "stm32f469_gpio_driver.h"
+
+void delay() {
+	for (int i = 0; i < 1000000; i++);
+}
 
 int main(void)
 {
+	GPIO_PeriClockControl(GPIOD, ENABLE);
+	GPIO_PeriClockControl(GPIOA, ENABLE);
+
+	GPIO_Handle handle;
+	handle.pGPIOx = GPIOD;
+	handle.GPIO_PinConfig.GPIO_pin = GPIO_PIN_4;
+	handle.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+	handle.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD;
+	handle.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPD_PU;
+	GPIO_Init(&handle);
+
+	handle.pGPIOx = GPIOA;
+	handle.GPIO_PinConfig.GPIO_pin = GPIO_PIN_0;
+	handle.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPD_NONE;
+	handle.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+	GPIO_Init(&handle);
 
 	for(;;) {
-		GPIOA_PCLK_EN();
-		GPIOA_PCLK_DI();
-	};
+		if (GPIO_ReadPin(GPIOA, GPIO_PIN_0)) {
+			GPIO_WriteToPin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
+		} else {
+			GPIO_WriteToPin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET);
+		}
+	}
 }
