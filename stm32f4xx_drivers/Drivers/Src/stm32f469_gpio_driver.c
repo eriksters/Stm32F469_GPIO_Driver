@@ -93,25 +93,43 @@ void GPIO_Init(GPIO_Handle* pHandle) {
 
 	uint32_t temp;
 
-	//	Config mode
+	//	GPIO Input/output mode
 	if (pHandle->GPIO_PinConfig.GPIO_PinMode < 4) {
 		temp = (pHandle->GPIO_PinConfig.GPIO_PinMode << (2 * pHandle->GPIO_PinConfig.GPIO_pin));
 		pHandle->pGPIOx->MODER |= temp;
 
-	} else if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_FT){
+	//	GPIO Interrupts
+	//	Config EXTI ftsr and rtsr registers
+	} else {
+
 		//	Interrupt: falling edge trigger detection
-		EXTI->FTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
-		EXTI->RTSR &= ~(1 << pHandle->GPIO_PinConfig.GPIO_pin);
+		if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_FT){
+			EXTI->FTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
+			EXTI->RTSR &= ~(1 << pHandle->GPIO_PinConfig.GPIO_pin);
 
-	} else if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_RT){
 		//	Interrupt: Rising edge trigger detection
-		EXTI->RTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
-		EXTI->FTSR &= ~(1 << pHandle->GPIO_PinConfig.GPIO_pin);
+		} else if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_RT){
+			EXTI->RTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
+			EXTI->FTSR &= ~(1 << pHandle->GPIO_PinConfig.GPIO_pin);
 
-	} else if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_RFT){
 		//	Interrupt: Rising/Falling edge trigger detection
-		EXTI->FTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
-		EXTI->RTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
+		} else if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_RFT){
+			EXTI->FTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
+			EXTI->RTSR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
+		}
+
+		//	Enable SYSCFG peripheral clock
+		SYSCFG_PCLK_EN();
+
+		//	Config selected GPIO port for exti in SYSCFG register
+		uint8_t tmpRegNr = pHandle->GPIO_PinConfig.GPIO_pin / 4;
+		uint8_t tmpPos = pHandle->GPIO_PinConfig.GPIO_pin % 4;
+		SYSCFG->EXTICR[tmpRegNr] = 	GPIOx_TO_EXTICFG(pHandle->pGPIOx) << (tmpPos * 4);
+
+		//	Enable exti interrupt delivery in IMR register
+		EXTI->IMR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
+
+
 	}
 
 	//	Config speed
@@ -129,8 +147,8 @@ void GPIO_Init(GPIO_Handle* pHandle) {
 	//	config AF
 }
 
-void GPIO_DeInit(GPIO_RegDef_t* pGPOI){
-
+void GPIO_DeInit(GPIO_RegDef_t* pGPIO){
+	pGPIO->BSRR;						//	  TODO
 }
 
 //	Read / write
@@ -164,7 +182,16 @@ void GPIO_TogglePin(GPIO_RegDef_t* pGPIO, uint16_t pin){
 }
 
 //	Interrupts
-void GPIO_IRQConfig(uint8_t IRQNumber, uint8_t IRQPriority, uint8_t enDi){
+void GPIO_IRQConfig(IRQn_Type IRQ, uint8_t IRQPriority, uint8_t enDi){
+
+	uint8_t tmpRegNr = IRQ / 32;
+	uint8_t tmpRegPos = IRQ % 32;
+
+
+	if (enDi == ENABLE) {
+		NVIC_ISER_REG[tmpRegNr] |= (1 << tmpRegPos);
+	}
+
 
 }
 
