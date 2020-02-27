@@ -20,17 +20,19 @@ int main(void)
 	GPIO_PeriClockControl(GPIOA, ENABLE);
 
 	GPIO_Handle handle;
-	handle.pGPIOx = GPIOD;
-	handle.GPIO_PinConfig.GPIO_pin = GPIO_PIN_4;
-	handle.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-	handle.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD;
-	handle.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPD_PU;
+
+	handle.pGPIOx = GPIOA;
+	handle.GPIO_PinConfig.GPIO_pin = GPIO_PIN_2;
+	handle.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IR_FT;
+	handle.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPD_NONE;
+	handle.GPIO_PinConfig.GPIO_PinAltFunMode = 0x5U;
 	GPIO_Init(&handle);
 
 	handle.pGPIOx = GPIOA;
-	handle.GPIO_PinConfig.GPIO_pin = GPIO_PIN_0;
+	handle.GPIO_PinConfig.GPIO_pin = GPIO_PIN_12;
+	handle.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IR_FT;
 	handle.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPD_NONE;
-	handle.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+	handle.GPIO_PinConfig.GPIO_PinAltFunMode = 0x5U;
 	GPIO_Init(&handle);
 
 	for(;;) {

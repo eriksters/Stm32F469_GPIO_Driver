@@ -91,7 +91,7 @@ void GPIO_PeriClockControl(GPIO_RegDef_t* port, uint8_t enDi) {
  */
 void GPIO_Init(GPIO_Handle* pHandle) {
 
-	uint32_t temp;
+	uint32_t temp = 0, temp2 = 0;
 
 	//	GPIO Input/output mode
 	if (pHandle->GPIO_PinConfig.GPIO_PinMode < 4) {
@@ -101,6 +101,9 @@ void GPIO_Init(GPIO_Handle* pHandle) {
 	//	GPIO Interrupts
 	//	Config EXTI ftsr and rtsr registers
 	} else {
+
+		//	Set MODER to input
+		pHandle->pGPIOx->MODER |= (GPIO_MODE_IN << (2 * pHandle->GPIO_PinConfig.GPIO_pin));
 
 		//	Interrupt: falling edge trigger detection
 		if (pHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_IR_FT){
@@ -121,12 +124,18 @@ void GPIO_Init(GPIO_Handle* pHandle) {
 		//	Enable SYSCFG peripheral clock
 		SYSCFG_PCLK_EN();
 
-		//	Config selected GPIO port for exti in SYSCFG register
+		/*****	Config selected GPIO port for exti in SYSCFG register *******/
 		uint8_t tmpRegNr = pHandle->GPIO_PinConfig.GPIO_pin / 4;
 		uint8_t tmpPos = pHandle->GPIO_PinConfig.GPIO_pin % 4;
-		SYSCFG->EXTICR[tmpRegNr] = 	GPIOx_TO_EXTICFG(pHandle->pGPIOx) << (tmpPos * 4);
 
-		//	Enable exti interrupt delivery in IMR register
+		//	Clear previous config
+		temp = ~(0xF << (tmpPos * 4));
+		SYSCFG->EXTICR[tmpRegNr] &= temp;
+
+		//	Enter new config
+		SYSCFG->EXTICR[tmpRegNr] |= (GPIOx_TO_EXTICFG(pHandle->pGPIOx) << (tmpPos * 4));
+
+		/*****	Enable exti interrupt delivery in IMR register 	********/
 		EXTI->IMR |= (1 << pHandle->GPIO_PinConfig.GPIO_pin);
 
 
@@ -145,10 +154,40 @@ void GPIO_Init(GPIO_Handle* pHandle) {
 	pHandle->pGPIOx->OTYPER |= temp;
 
 	//	config AF
+	//	Clear previous config
+	temp2 = (pHandle->GPIO_PinConfig.GPIO_pin % 8) * 4;
+	temp = ~((0xFF) << temp2);
+	pHandle->pGPIOx->AFR[pHandle->GPIO_PinConfig.GPIO_pin / 8] &= temp;
+
+	//	Enter new config
+	temp = (pHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (temp2));
+	pHandle->pGPIOx->AFR[pHandle->GPIO_PinConfig.GPIO_pin / 8] |= temp;
 }
 
 void GPIO_DeInit(GPIO_RegDef_t* pGPIO){
-	pGPIO->BSRR;						//	  TODO
+	if (pGPIO == GPIOA) {
+		GPIOA_REG_RESET();
+	} else if (pGPIO == GPIOB) {
+		GPIOB_REG_RESET();
+	} else if (pGPIO == GPIOC) {
+		GPIOC_REG_RESET();
+	} else if (pGPIO == GPIOD) {
+		GPIOD_REG_RESET();
+	} else if (pGPIO == GPIOE) {
+		GPIOE_REG_RESET();
+	} else if (pGPIO == GPIOF) {
+		GPIOF_REG_RESET();
+	} else if (pGPIO == GPIOG) {
+		GPIOG_REG_RESET();
+	} else if (pGPIO == GPIOH) {
+		GPIOH_REG_RESET();
+	} else if (pGPIO == GPIOI) {
+		GPIOI_REG_RESET();
+	} else if (pGPIO == GPIOJ) {
+		GPIOJ_REG_RESET();
+	} else if (pGPIO == GPIOK) {
+		GPIOK_REG_RESET();
+	}
 }
 
 //	Read / write
